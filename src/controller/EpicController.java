@@ -63,7 +63,7 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		Epic epic = epics.remove(id);
 		if (epic != null)
 			deleteAllByEpicId(id);
-		return epics.remove(id);
+		return epic;
 	}
 
 	private void deleteAllByEpicId(int epicId) {
