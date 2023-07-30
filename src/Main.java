@@ -1,7 +1,9 @@
 import controller.EpicController;
+import controller.TaskController;
 import model.Epic;
 import model.Status;
 import model.Subtask;
+import model.Task;
 
 public class Main {
 
@@ -88,5 +90,62 @@ public class Main {
         System.out.println("тест на удаление ВСЕГО!!!!!111");
         ec.deleteAll();
         System.out.println("Эпики: " + ec.getAll());
+        System.out.println();
+
+        TaskController tc = new TaskController();
+        Task task = null;
+
+        //тест на добавление задачи
+        System.out.println("тест на добавление задачи");
+        task = tc.add(new Task("first task", "description", Status.NEW));
+        tc.add(new Task("second task", "description", Status.IN_PROGRESS));
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на добавление уже существующей задачи
+        System.out.println("тест на добавление уже существующей задачи");
+        task = tc.add(new Task("first task", "description", Status.NEW));
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на обновление задачи
+        System.out.println("тест на обновление задачи");
+        task = new Task("updated task", "description", Status.DONE);
+        task.setId(1);
+        task = tc.update(task);
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на обновление несуществующей задачи
+        System.out.println("тест на обновление несуществующей задачи");
+        task = new Task("updated task", "description", Status.DONE);
+        task.setId(123456789);
+        task = tc.update(task);
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на удаление несуществующей задачи
+        System.out.println("тест на удаление несуществующей задачи");
+        task = tc.delete(123456789);
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на удаление задачи
+        System.out.println("тест на удаление задачи");
+        task = tc.delete(2);
+        System.out.println("Задача из метода: " + task);
+        System.out.println("Все задачи: " + tc.getAll());
+        System.out.println();
+
+        //тест на удаление ВСЕГО!!!!!111
+        System.out.println("тест на удаление ВСЕГО!!!!!111");
+        tc.deleteAll();
+        System.out.println("Задачи: " + tc.getAll());
+        System.out.println();
     }
 }
