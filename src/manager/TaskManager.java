@@ -1,45 +1,75 @@
-package controller;
+package manager;
+
+import model.Epic;
+import model.Status;
+import model.Subtask;
+import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import model.Epic;
-import model.Status;
-import model.Subtask;
-
-/*
-Epic и Subtask неразрывные сущности, поэтому контроллер для них один.
- */
-public class EpicController implements Controller<Epic>, SubtaskController {
+public class TaskManager {
 	private int idCounter;
+	private final HashMap<Integer, Task> tasks;
 	private final HashMap<Integer, Epic> epics;
 	private final HashMap<Integer, Subtask> subtasks;
 
-	public EpicController() {
+	public TaskManager() {
 		idCounter = 0;
+		tasks = new HashMap<>();
 		epics = new HashMap<>();
 		subtasks = new HashMap<>();
 	}
 
-	@Override
-	public List<Epic> getAll() {
+	public List<Task> getTasks() {
+		return new ArrayList<>(tasks.values());
+	}
+
+	public void deleteTasks() {
+		tasks.clear();
+	}
+
+	public Task getTask(int id) {
+		return tasks.remove(id);
+	}
+
+	public Task add(Task task) {
+		if (tasks.containsValue(task))
+			return null;
+		task.setId(++idCounter);
+		tasks.put(task.getId(), task);
+		return task;
+	}
+
+	public Task update(Task updatedTask) {
+		Task task = tasks.get(updatedTask.getId());
+		if (task == null)
+			return null;
+		task.setName(updatedTask.getName());
+		task.setDescription(updatedTask.getDescription());
+		task.setStatus(updatedTask.getStatus());
+		return task;
+	}
+
+	public Task deleteTask(int id) {
+		return tasks.remove(id);
+	}
+
+	public List<Epic> getEpics() {
 		return new ArrayList<>(epics.values());
 	}
 
-	@Override
-	public void deleteAll() {
+	public void deleteEpics() {
 		epics.clear();
 		subtasks.clear();
 	}
 
-	@Override
-	public Epic getById(int id) {
+	public Epic getEpic(int id) {
 		return epics.get(id);
 	}
 
-	@Override
 	public Epic add(Epic epic) {
 		if (epics.containsValue(epic))
 			return null;
@@ -48,7 +78,6 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		return epic;
 	}
 
-	@Override
 	public Epic update(Epic updatedEpic) {
 		Epic epic = epics.get(updatedEpic.getId());
 		if (epic == null)
@@ -58,34 +87,30 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		return epic;
 	}
 
-	@Override
-	public Epic delete(int id) {
+	public Epic deleteEpic(int id) {
 		Epic epic = epics.remove(id);
 		if (epic != null)
-			deleteAllByEpicId(id);
+			deleteSubtasks(id);
 		return epic;
 	}
 
-	private void deleteAllByEpicId(int epicId) {
+	private void deleteSubtasks(int epicId) {
 		for (Subtask s : subtasks.values()) {
 			if (s.getEpicId() == epicId)
 				subtasks.remove(s.getId());
 		}
 	}
 
-	@Override
-	public List<Subtask> getAllByEpicId(int epicId) {
+	public List<Subtask> getSubtasks(int epicId) {
 		return subtasks.values().stream()
 				.filter(subtask -> subtask.getEpicId() == epicId)
 				.collect(Collectors.toList());
 	}
 
-	@Override
-	public Subtask getSubtaskById(int id) {
+	public Subtask getSubtask(int id) {
 		return subtasks.get(id);
 	}
 
-	@Override
 	public Subtask add(Subtask subtask) {
 		Epic epic = epics.get(subtask.getEpicId());
 		if (epic == null)
@@ -93,11 +118,12 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		subtask.setId(++idCounter);
 		subtasks.put(subtask.getId(), subtask);
 		epic.setStatus(findEpicStatusById(epic.getId()));
+		epic.addSubtaskId(subtask.getId());
 		return subtask;
 	}
 
 	private Status findEpicStatusById(int id) {
-		List<Subtask> epicSubtasks = getAllByEpicId(id);
+		List<Subtask> epicSubtasks = getSubtasks(id);
 		int statusDoneCounter = 0;
 		for (Subtask subtask : epicSubtasks) {
 			if (subtask.getStatus() == Status.IN_PROGRESS)
@@ -111,7 +137,6 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		else return Status.NEW;
 	}
 
-	@Override
 	public Subtask update(Subtask updatedSubtask) {
 		Subtask subtask = subtasks.get(updatedSubtask.getId());
 		if (subtask == null)
@@ -124,12 +149,12 @@ public class EpicController implements Controller<Epic>, SubtaskController {
 		return subtask;
 	}
 
-	@Override
 	public Subtask deleteSubtask(int id) {
 		Subtask subtask = subtasks.remove(id);
 		if (subtask != null) {
 			Epic epic = epics.get(subtask.getEpicId());
 			epic.setStatus(findEpicStatusById(epic.getId()));
+			epic.deleteSubtaskId(subtask.getId());
 		}
 		return subtask;
 	}
