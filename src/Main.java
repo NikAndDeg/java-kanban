@@ -16,14 +16,14 @@ public class Main {
         //тест на добавление эпика
         System.out.println("\nтесты эпиков и подзадач");
         System.out.println("тест на добавление эпика");
-        epic = taskManager.add(new Epic("first epic", "description"));
+        epic = taskManager.addEpic(new Epic("first epic", "description"));
         System.out.println("Эпик из метода: " + epic);
         System.out.println("Все эпики: " + taskManager.getEpics());
         System.out.println();
 
         //тест на добавление уже существующего эпика
         System.out.println("тест на добавление уже существующего эпика");
-        epic = taskManager.add(new Epic("first epic", "description"));
+        epic = taskManager.addEpic(new Epic("first epic", "description"));
         System.out.println("Эпик из метода: " + epic);
         System.out.println("Все эпики: " + taskManager.getEpics());
         System.out.println();
@@ -60,11 +60,11 @@ public class Main {
         System.out.println("Все эпики: " + taskManager.getEpics());
         System.out.println();
 
-        taskManager.add(new Epic("second epic", "description"));
+        taskManager.addEpic(new Epic("second epic", "description"));
 
         //тест на добавление подзадачи
         System.out.println("тест на добавление подзадачи");
-        subtask = taskManager.add(new Subtask(2, "first subtask", "description", Status.NEW));
+        subtask = taskManager.addSubtask(new Subtask(2, "first subtask", "description", Status.NEW));
         System.out.println("Подзадача из метода: " + subtask);
         System.out.println("Эпик: " + taskManager.getEpic(2));
         System.out.println();
@@ -80,13 +80,13 @@ public class Main {
         System.out.println();
 
         System.out.println("добавляем подзадачу со статусом IN_PROGRESS");
-        subtask = taskManager.add(new Subtask(2, "third subtask", "description", Status.IN_PROGRESS));
+        subtask = taskManager.addSubtask(new Subtask(2, "third subtask", "description", Status.IN_PROGRESS));
         System.out.println("Подзадача из метода: " + subtask);
         System.out.println("Эпик: " + taskManager.getEpic(2));
         System.out.println();
 
         System.out.println("добавляем подзадачу со статусом NEW и удаляем остальные подзадачи");
-        taskManager.add(new Subtask(2, "fourth subtask", "description", Status.NEW));
+        taskManager.addSubtask(new Subtask(2, "fourth subtask", "description", Status.NEW));
         taskManager.deleteSubtask(3);
         taskManager.deleteSubtask(4);
         System.out.println("Эпик: " + taskManager.getEpic(2));
@@ -103,15 +103,15 @@ public class Main {
         //тест на добавление задачи
         System.out.println("\nтесты задач");
         System.out.println("тест на добавление задачи");
-        task = taskManager.add(new Task("first task", "description", Status.NEW));
-        taskManager.add(new Task("second task", "description", Status.IN_PROGRESS));
+        task = taskManager.addTask(new Task("first task", "description", Status.NEW));
+        taskManager.addTask(new Task("second task", "description", Status.IN_PROGRESS));
         System.out.println("Задача из метода: " + task);
         System.out.println("Все задачи: " + taskManager.getTasks());
         System.out.println();
 
         //тест на добавление уже существующей задачи
         System.out.println("тест на добавление уже существующей задачи");
-        task = taskManager.add(new Task("first task", "description", Status.NEW));
+        task = taskManager.addTask(new Task("first task", "description", Status.NEW));
         System.out.println("Задача из метода: " + task);
         System.out.println("Все задачи: " + taskManager.getTasks());
         System.out.println();
