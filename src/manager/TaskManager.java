@@ -8,25 +8,25 @@ import java.util.List;
 
 public interface TaskManager {
 
-	public List<Task> getTasks();
-	public void deleteTasks();
-	public Task getTask(int id);
-	public Task addTask(Task task);
-	public Task updateTask(Task updatedTask);
-	public Task deleteTask(int id);
+	List<Task> getTasks();
+	void deleteTasks();
+	Task getTask(int id);
+	Task addTask(Task task);
+	Task updateTask(Task updatedTask);
+	Task deleteTask(int id);
 
-	public List<Epic> getEpics();
-	public void deleteEpics();
-	public Epic getEpic(int id);
-	public Epic addEpic(Epic epic);
-	public Epic updateEpic(Epic updatedEpic);
-	public Epic deleteEpic(int id);
+	List<Epic> getEpics();
+	void deleteEpics();
+	Epic getEpic(int id);
+	Epic addEpic(Epic epic);
+	Epic updateEpic(Epic updatedEpic);
+	Epic deleteEpic(int id);
 
-	public List<Subtask> getSubtasks(int epicId);
-	public Subtask getSubtask(int id);
-	public Subtask addSubtask(Subtask subtask);
-	public Subtask updateSubtask(Subtask updatedSubtask);
-	public Subtask deleteSubtask(int id);
+	List<Subtask> getSubtasks(int epicId);
+	Subtask getSubtask(int id);
+	Subtask addSubtask(Subtask subtask);
+	Subtask updateSubtask(Subtask updatedSubtask);
+	Subtask deleteSubtask(int id);
 
-	public List<Task> getHistory();
+	List<Task> getHistory();
 }

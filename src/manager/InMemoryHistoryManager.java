@@ -5,8 +5,8 @@ import model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryHistoryManager implements HistoryManager<Task> {
-	private final static int DEFAULT_HISTORY_SIZE = 10;
+public class InMemoryHistoryManager implements HistoryManager {
+	private static final int DEFAULT_HISTORY_SIZE = 10;
 
 	private final List<Task> history;
 

@@ -1,8 +1,10 @@
 package manager;
 
+import model.Task;
+
 import java.util.List;
 
-public interface HistoryManager<T> {
-	public void add(T t);
-	public List<T> getHistory();
+public interface HistoryManager {
+	void add(Task task);
+	List<Task> getHistory();
 }

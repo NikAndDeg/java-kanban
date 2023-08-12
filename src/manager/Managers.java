@@ -1,14 +1,12 @@
 package manager;
 
-import model.Task;
-
 public class Managers {
 
-	public static InMemoryTaskManager getDefault() {
+	public static TaskManager getDefault() {
 		return new InMemoryTaskManager();
 	}
 
-	public static HistoryManager<Task> getDefaultHistory() {
+	public static HistoryManager getDefaultHistory() {
 		return new InMemoryHistoryManager();
 	}
 }
