@@ -2,8 +2,6 @@ import manager.*;
 import model.*;
 import model.list.CustomLinkedList;
 
-import java.util.Arrays;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -34,10 +32,10 @@ public class Main {
 
         System.out.println("Заполнение значениями 10, 99, 500, 7");
         System.out.println("Получение значений по индексу:");
-        list.add(10);
-        list.add(99);
-        list.add(500);
-        list.add(7);
+        list.linkLast(10);
+        list.linkLast(99);
+        list.linkLast(500);
+        list.linkLast(7);
         System.out.print("10 по индексу 0: ");
         System.out.println(list.get(0).equals(10));
         System.out.print("99 по индексу 1: ");
@@ -73,15 +71,15 @@ public class Main {
         System.out.println("Создание CustomLinkedList<Integer>");
         System.out.println("Заполнение значениями 10, 99, 500, 7");
         list = new CustomLinkedList<>();
-        list.add(10);
-        list.add(99);
-        list.add(500);
-        list.add(7);
+        list.linkLast(10);
+        list.linkLast(99);
+        list.linkLast(500);
+        list.linkLast(7);
         System.out.print("Получение списка [10, 99, 500, 7]: ");
         System.out.println(list.getAsList().toString().equals("[10, 99, 500, 7]"));
         System.out.println("Добавление значений-повторов 99 и 500.");
-        list.add(99);
-        list.add(500);
+        list.linkLast(99);
+        list.linkLast(500);
         System.out.print("Получение списка [10, 7, 99, 500]: ");
         System.out.println(list.getAsList().toString().equals("[10, 7, 99, 500]"));
 
@@ -92,6 +90,8 @@ public class Main {
         System.out.println("Тестирование истории: ");
         TaskManager tm = Managers.getDefault();
 
+        System.out.println("Создание менеджера и заполнение его задачами 1, 2, 3, 4," +
+                " эпиком 5 с подзадачами 6, 7 и пустым эпиком 8");
         /*
         Task{id=1, name='1', description='description', status=NEW}
         Task{id=2, name='2', description='description', status=NEW}
@@ -110,7 +110,9 @@ public class Main {
         tm.addSubtask(getNewSubtask("6", 5));
         tm.addSubtask(getNewSubtask("7", 5));
         tm.addEpic(getNewEpic("8"));
+        System.out.println();
 
+        System.out.println("Вызов задач 1, 2, 4, 3");
         tm.getTask(1);
         tm.getTask(2);
         tm.getTask(4);
@@ -121,8 +123,13 @@ public class Main {
                 " Task{id=4, name='4', description='description', status=NEW}," +
                 " Task{id=3, name='3', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 1, 2, 4, 3: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
 
+        System.out.println("Вызов задач 1, 1, 4");
         tm.getTask(1);
         tm.getTask(1);
         tm.getTask(4);
@@ -132,16 +139,26 @@ public class Main {
                 " Task{id=1, name='1', description='description', status=NEW}," +
                 " Task{id=4, name='4', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 2, 3, 1, 4: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
 
+        System.out.println("Удаление задачи 3");
         tm.deleteTask(3);
         s = "[" +
                 "Task{id=2, name='2', description='description', status=NEW}," +
                 " Task{id=1, name='1', description='description', status=NEW}," +
                 " Task{id=4, name='4', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 2, 1, 4: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
 
+        System.out.println("Вызов эпика 8, подзадачи 7, эпика 5");
         tm.getEpic(8);
         tm.getSubtask(7);
         tm.getEpic(5);
@@ -153,8 +170,13 @@ public class Main {
                 " Subtask{epicId=5, id=7, name='7', description='description', status=NEW}," +
                 " Epic{subtasksId[6, 7], id=5, name='5', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 2, 1, 4, 8, 7, 5: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
 
+        System.out.println("Удаление эпика 5");
         tm.deleteEpic(5);
         s = "[" +
                 "Task{id=2, name='2', description='description', status=NEW}," +
@@ -162,8 +184,13 @@ public class Main {
                 " Task{id=4, name='4', description='description', status=NEW}," +
                 " Epic{subtasksId[], id=8, name='8', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 2, 1, 4, 8: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
 
+        System.out.println("Добавление эпику 8 подзадачи 9 и вызов этой подзадачи");
         /*
         Subtask{epicId=8, id=9, name='9', description='description', status=NEW}
          */
@@ -176,6 +203,10 @@ public class Main {
                 " Epic{subtasksId[9], id=8, name='8', description='description', status=NEW}," +
                 " Subtask{epicId=8, id=9, name='9', description='description', status=NEW}" +
                 "]";
+        System.out.println("Вызов истории просмотра задач");
+        System.out.println(tm.getHistory());
+        System.out.print("Ожидаемые id в истории: 2, 1, 4, 8, 9: ");
         System.out.println(tm.getHistory().toString().equals(s));
+        System.out.println();
     }
 }
