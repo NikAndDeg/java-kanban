@@ -65,7 +65,8 @@ public class CustomLinkedList<T> {
 		dataIndexMap.remove(node.getData());
 		if (node == head) {
 			Node<T> newHead = head.getNext();
-			newHead.setPrev(null);
+			if (newHead != null)
+				newHead.setPrev(null);
 			head = newHead;
 			return node.getData();
 		}
@@ -91,6 +92,8 @@ public class CustomLinkedList<T> {
 
 	public List<T> getAsList() {
 		List<T> list = new ArrayList<>();
+		if (head == null)
+			return list;
 		Node<T> node = head;
 		while (node.getNext() != null) {
 			list.add(node.getData());

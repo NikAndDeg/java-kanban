@@ -14,6 +14,16 @@ public class Subtask extends Task {
 	}
 
 	@Override
+	public String toStringForCSV() {
+		return getClass().getSimpleName() +
+				"," + id +
+				"," + name +
+				"," + description +
+				"," + status +
+				"," + epicId;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

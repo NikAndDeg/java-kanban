@@ -47,6 +47,14 @@ public class Task {
 		this.status = status;
 	}
 
+	public String toStringForCSV() {
+		return getClass().getSimpleName() +
+				"," + id +
+				"," + name +
+				"," + description +
+				"," + status;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

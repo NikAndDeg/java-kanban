@@ -5,20 +5,34 @@ import model.list.CustomLinkedList;
 public class Main {
 
     public static void main(String[] args) {
-        testCustomLinkedList();
-        testHistory();
+        saveCheck();
+        loadCheck();
     }
 
-    private static Task getNewTask(String name) {
-        return new Task(name, "description", Status.NEW);
+    private static void loadCheck() {
+        FileBackedTaskManager tm = new FileBackedTaskManager();
+        tm.loadFromFile(FileBackedTaskManager.DEFAULT_SAVE_DIRECTORY + "/" + FileBackedTaskManager.DEFAULT_SAVE_FILE);
+        tm.getTasks().forEach(task -> System.out.println(task.toStringForCSV()));
+        tm.getEpics().forEach(epic -> System.out.println(epic.toStringForCSV()));
+        tm.getAllSubtasks().forEach(subtask -> System.out.println(subtask.toStringForCSV()));
+        tm.getHistory().forEach(task -> System.out.print(task.getId()));
     }
 
-    private static Epic getNewEpic(String name) {
-        return new Epic(name, "description");
-    }
-
-    private static Subtask getNewSubtask(String name, int epicId) {
-        return new Subtask(epicId, name, "description", Status.NEW);
+    private static void saveCheck() {
+        FileBackedTaskManager tm = new FileBackedTaskManager();
+        tm.addTask(getNewTask("Task 1"));
+        tm.addTask(getNewTask("Task 2"));
+        tm.addEpic(getNewEpic("Epic 1"));
+        tm.addEpic(getNewEpic("Epic 2"));
+        tm.addSubtask(new Subtask(3, "Subtask 1", "description", Status.DONE));
+        tm.addSubtask(getNewSubtask("Subtask 2", 3));
+        tm.addSubtask(getNewSubtask("Subtask 3", 4));
+        tm.addSubtask(getNewSubtask("Subtask 4", 4));
+        tm.addSubtask(getNewSubtask("Subtask 5", 4));
+        tm.getTask(1);
+        tm.getEpic(4);
+        tm.getSubtask(7);
+        tm.save();
     }
 
     private static void testCustomLinkedList() {
@@ -208,5 +222,17 @@ public class Main {
         System.out.print("Ожидаемые id в истории: 2, 1, 4, 8, 9: ");
         System.out.println(tm.getHistory().toString().equals(s));
         System.out.println();
+    }
+
+    private static Task getNewTask(String name) {
+        return new Task(name, "description", Status.NEW);
+    }
+
+    private static Epic getNewEpic(String name) {
+        return new Epic(name, "description");
+    }
+
+    private static Subtask getNewSubtask(String name, int epicId) {
+        return new Subtask(epicId, name, "description", Status.NEW);
     }
 }

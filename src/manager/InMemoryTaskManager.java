@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class InMemoryTaskManager implements TaskManager {
-	private int idCounter;
-	private final HashMap<Integer, Task> tasks;
-	private final HashMap<Integer, Epic> epics;
-	private final HashMap<Integer, Subtask> subtasks;
-	private final HistoryManager historyManager;
+	protected int idCounter;
+	protected final HashMap<Integer, Task> tasks;
+	protected final HashMap<Integer, Epic> epics;
+	protected final HashMap<Integer, Subtask> subtasks;
+	protected final HistoryManager historyManager;
 
 	public InMemoryTaskManager() {
 		idCounter = 0;
@@ -173,12 +173,11 @@ public class InMemoryTaskManager implements TaskManager {
 				statusDoneCounter++;
 			}
 		}
-		if (epicSubtasks.size() == statusDoneCounter) {
-			return Status.DONE;
-		}
-		else {
+		if (statusDoneCounter == 0)
 			return Status.NEW;
-		}
+		if (epicSubtasks.size() == statusDoneCounter)
+			return Status.DONE;
+		return Status.IN_PROGRESS;
 	}
 
 	@Override
