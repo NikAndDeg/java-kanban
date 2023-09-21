@@ -23,6 +23,7 @@ public interface TaskManager {
 	Epic deleteEpic(int id);
 
 	List<Subtask> getSubtasks(int epicId);
+	List<Subtask> getAllSubtasks();
 	Subtask getSubtask(int id);
 	Subtask addSubtask(Subtask subtask);
 	Subtask updateSubtask(Subtask updatedSubtask);
