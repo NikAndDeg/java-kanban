@@ -13,7 +13,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,9 +43,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		System.out.println(tm.getTasks());
 		System.out.println(tm.getEpics());
 		System.out.println(tm.getAllSubtasks());
-		tm.getHistory().forEach(System.out::print);
+		tm.getHistory().forEach(task -> System.out.print(task.getId()));
 
-		System.out.println();
 		System.out.println();
 
 		tm = FileBackedTaskManager.loadFromFile(saveFile);
@@ -54,7 +52,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		System.out.println(tm.getTasks());
 		System.out.println(tm.getEpics());
 		System.out.println(tm.getAllSubtasks());
-		tm.getHistory().forEach(System.out::print);
+		tm.getHistory().forEach(task -> System.out.print(task.getId()));
 	}
 
 	private static final String FIRST_LINE = "type,id,name,description,status,epicId";
@@ -164,7 +162,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	public static FileBackedTaskManager loadFromFile(File saveFile) {
 		FileBackedTaskManager manager = new FileBackedTaskManager(saveFile);
 		try (BufferedReader reader = new BufferedReader(new FileReader(saveFile.getPath()))) {
-			manager.uploadToManager(reader.lines());
+			uploadToManager(reader.lines(), manager);
 		} catch (FileNotFoundException exception) {
 			System.out.println(exception.getMessage());
 		} catch (IOException exception) {
@@ -173,54 +171,49 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		return manager;
 	}
 
-	private void uploadToManager(Stream<String> lines) {
+	private static void uploadToManager(Stream<String> lines, FileBackedTaskManager manager) {
 		lines.forEach(s -> {
 			if (s.startsWith(Task.class.getSimpleName())) {
-				uploadTask(s);
+				uploadTask(s, manager);
 			}
 			if (s.startsWith(Epic.class.getSimpleName()))
-				uploadEpic(s);
+				uploadEpic(s, manager);
 			if (s.startsWith(Subtask.class.getSimpleName()))
-				uploadSubtask(s);
+				uploadSubtask(s, manager);
 			if (s.startsWith("["))
-				uploadHistory(s);
+				uploadHistory(s, manager);
 		});
 	}
 
-	private void uploadTask(String line) {
+	private static void uploadTask(String line, FileBackedTaskManager manager) {
 		Task task = fromString(line);
-		tasks.put(task.getId(), task);
-		countLoadedTask();
+		manager.idCounter++;
+		manager.tasks.put(task.getId(), task);
 	}
 
-	private void countLoadedTask() {
-		idCounter++;
-	}
-
-	private void uploadEpic(String line) {
+	private static void uploadEpic(String line, FileBackedTaskManager manager) {
 		Epic epic = (Epic) fromString(line);
-		epics.put(epic.getId(), epic);
-		countLoadedTask();
+		manager.idCounter++;
+		manager.epics.put(epic.getId(), epic);
 	}
 
-	private void uploadSubtask(String line) {
+	private static void uploadSubtask(String line, FileBackedTaskManager manager) {
 		Subtask subtask = (Subtask) fromString(line);
 		int epicId = subtask.getEpicId();
 		int subtaskId = subtask.getId();
-		epics.get(epicId).addSubtaskId(subtaskId);
-		subtasks.put(subtask.getId(), subtask);
-		countLoadedTask();
+		manager.epics.get(epicId).addSubtaskId(subtaskId);
+		manager.idCounter++;
+		manager.subtasks.put(subtask.getId(), subtask);
 	}
 
-	private Task fromString(String line) {
+	private static Task fromString(String line) {
 		String[] lineElements = line.split(",");
-		String taskClass = lineElements[0];
-		if (taskClass.equals(Task.class.getSimpleName())) {
+		if (lineElements[0].equals(Task.class.getSimpleName())) {
 			Task task = new Task(lineElements[2], lineElements[3], Status.valueOf(lineElements[4]));
 			task.setId(Integer.parseInt(lineElements[1]));
 			return task;
 		}
-		if (taskClass.equals(Epic.class.getSimpleName())) {
+		if (lineElements[0].equals(Epic.class.getSimpleName())) {
 			Epic epic = new Epic(lineElements[2], lineElements[3]);
 			epic.setStatus(Status.valueOf(lineElements[4]));
 			epic.setId(Integer.parseInt(lineElements[1]));
@@ -232,24 +225,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		return subtask;
 	}
 
-	private void uploadHistory(String line) {
+	private static void uploadHistory(String line, FileBackedTaskManager manager) {
 		if (line.equals("[]"))
 			return;
-		historyFromString(line).forEach(id -> {
-			if (tasks.containsKey(id))
-				historyManager.add(tasks.get(id));
-			if (epics.containsKey(id))
-				historyManager.add(epics.get(id));
-			if (subtasks.containsKey(id))
-				historyManager.add(subtasks.get(id));
-		});
-	}
-
-	private static List<Integer> historyFromString(String line) {
 		String[] lineElements = line.substring(1, line.length() - 1).split(",");
-		return Arrays.stream(lineElements)
-				.map(s -> Integer.parseInt(s.trim()))
-				.collect(Collectors.toList());
+		for (String s : lineElements) {
+			int id = Integer.parseInt(s.trim());
+			if (manager.tasks.containsKey(id))
+				manager.historyManager.add(manager.tasks.get(id));
+			if (manager.epics.containsKey(id))
+				manager.historyManager.add(manager.epics.get(id));
+			if (manager.subtasks.containsKey(id))
+				manager.historyManager.add(manager.subtasks.get(id));
+		}
 	}
 
 	private void save() {
@@ -265,7 +253,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 			for (Subtask subtask : subtasks.values()) {
 				writer.write("\n" + toString(subtask));
 			}
-			writer.write("\n" + historyToString(historyManager));
+			saveHistory(writer);
 		} catch (IOException exception) {
 			throw new ManagerSaveException(exception.getMessage(), exception.getCause());
 		}
@@ -299,10 +287,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 				"," + task.getStatus();
 	}
 
-	private static String historyToString(HistoryManager manager) {
-		return manager.getHistory().stream()
+	private void saveHistory(Writer writer) throws IOException {
+		writer.write("\n");
+		List<Integer> history = historyManager.getHistory().stream()
 				.map(Task::getId)
-				.collect(Collectors.toList())
-				.toString();
+				.collect(Collectors.toList());
+		writer.write(history.toString());
 	}
 }
