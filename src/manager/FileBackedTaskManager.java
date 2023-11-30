@@ -13,49 +13,15 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
-	public static void main(String[] args) {
-		String defaultSaveDirectory = "resources/saves";
-		String defaultSaveFile = "default-save.csv";
 
-		File saveFile = new File(defaultSaveDirectory, defaultSaveFile);
-
-		FileBackedTaskManager tm = new FileBackedTaskManager(saveFile);
-
-		tm.addTask(new Task("Task 1", "description", Status.NEW));
-		tm.addTask(new Task("Task 2", "description", Status.IN_PROGRESS));
-		tm.addEpic(new Epic("Epic 1", ""));
-		tm.addEpic(new Epic("Epic 2", "description"));
-		tm.addSubtask(new Subtask(3, "Subtask 1", "description", Status.DONE));
-		tm.addSubtask(new Subtask(3, "Subtask 2", "", Status.IN_PROGRESS));
-		tm.addSubtask(new Subtask(3, "Subtask 3", "", Status.NEW));
-		tm.addSubtask(new Subtask(4, "Subtask 4", "", Status.NEW));
-		tm.addSubtask(new Subtask(4, "Subtask 5", "", Status.NEW));
-
-		tm.getTask(1);
-		tm.getEpic(4);
-		tm.getSubtask(7);
-
-		System.out.println(tm.getTasks());
-		System.out.println(tm.getEpics());
-		System.out.println(tm.getAllSubtasks());
-		tm.getHistory().forEach(task -> System.out.print(task.getId()));
-
-		System.out.println();
-
-		tm = FileBackedTaskManager.loadFromFile(saveFile);
-
-		System.out.println(tm.getTasks());
-		System.out.println(tm.getEpics());
-		System.out.println(tm.getAllSubtasks());
-		tm.getHistory().forEach(task -> System.out.print(task.getId()));
-	}
-
-	private static final String FIRST_LINE = "type,id,name,description,status,epicId";
+	private static final String FIRST_LINE = "type,id,name,description,status,duration,startTime,endTime,epicId";
 	private final File saveFile;
 
 	public FileBackedTaskManager(File saveFile) {
@@ -209,7 +175,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 	private static Task fromString(String line) {
 		String[] lineElements = line.split(",");
 		if (lineElements[0].equals(Task.class.getSimpleName())) {
-			Task task = new Task(lineElements[2], lineElements[3], Status.valueOf(lineElements[4]));
+			Task task = new Task(lineElements[2],
+					lineElements[3],
+					Status.valueOf(lineElements[4]),
+					Duration.parse(lineElements[5]),
+					LocalDateTime.parse(lineElements[6]));
 			task.setId(Integer.parseInt(lineElements[1]));
 			return task;
 		}
@@ -217,10 +187,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 			Epic epic = new Epic(lineElements[2], lineElements[3]);
 			epic.setStatus(Status.valueOf(lineElements[4]));
 			epic.setId(Integer.parseInt(lineElements[1]));
+			epic.setDuration(Duration.parse(lineElements[5]));
+			epic.setStartTime(LocalDateTime.parse(lineElements[6]));
+			epic.setEndTime(LocalDateTime.parse(lineElements[7]));
 			return epic;
 		}
-		Subtask subtask = new Subtask(Integer.parseInt(lineElements[5]),
-				lineElements[2], lineElements[3], Status.valueOf(lineElements[4]));
+		Subtask subtask = new Subtask(Integer.parseInt(lineElements[8]),
+				lineElements[2],
+				lineElements[3],
+				Status.valueOf(lineElements[4]),
+				Duration.parse(lineElements[5]),
+				LocalDateTime.parse(lineElements[6]));
 		subtask.setId(Integer.parseInt(lineElements[1]));
 		return subtask;
 	}
@@ -278,13 +255,19 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 					"," + subtask.getName() +
 					"," + subtask.getDescription() +
 					"," + subtask.getStatus() +
+					"," + task.getDuration() +
+					"," + task.getStartTime() +
+					"," + task.getEndTime() +
 					"," + subtask.getEpicId();
 		}
 		return task.getClass().getSimpleName() +
 				"," + task.getId() +
 				"," + task.getName() +
 				"," + task.getDescription() +
-				"," + task.getStatus();
+				"," + task.getStatus() +
+				"," + task.getDuration() +
+				"," + task.getStartTime() +
+				"," + task.getEndTime();
 	}
 
 	private void saveHistory(Writer writer) throws IOException {

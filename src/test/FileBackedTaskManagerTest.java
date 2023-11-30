@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 	private final String defaultSaveDirectory = "resources/saves";
@@ -25,16 +27,16 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
 		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
 	}
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_and_epics() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
 
@@ -43,24 +45,24 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_and_epics_and_subtasks() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
-		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW));
-		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE));
+		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
 	}
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_and_epics_and_subtasks_and_history() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
-		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW));
-		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE));
+		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		manager.getTask(1);
 		manager.getSubtask(6);
@@ -71,12 +73,12 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_epics_subtasks_history_when_all_tasks_are_deleted() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
-		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW));
-		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE));
+		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		manager.getTask(1);
 		manager.getSubtask(6);
@@ -89,12 +91,12 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_epics_subtasks_history_when_all_epics_are_deleted() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
-		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW));
-		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE));
+		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		manager.getTask(1);
 		manager.getSubtask(6);
@@ -107,12 +109,12 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_epics_subtasks_history_when_all_tasks_epics_are_deleted() {
-		manager.addTask(new Task("task 1", "", NEW));
-		manager.addTask(new Task("task 2", "", NEW));
+		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
-		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW));
-		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE));
+		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		manager.getTask(1);
 		manager.getSubtask(6);

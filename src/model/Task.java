@@ -1,5 +1,7 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -7,12 +9,19 @@ public class Task {
 	protected String name;
 	protected String description;
 	protected Status status;
+	protected Duration duration;
+	protected LocalDateTime startTime;
+	protected LocalDateTime endTime;
 
-	public Task(String name, String description, Status status) {
+	public Task(String name, String description, Status status, Duration duration,
+				LocalDateTime startTime) {
 		id = 0;
 		this.name = name;
 		this.description = description;
 		this.status = status;
+		this.duration = duration;
+		this.startTime = startTime;
+		this.endTime = startTime.plus(duration);
 	}
 
 	public int getId() {
@@ -47,6 +56,37 @@ public class Task {
 		this.status = status;
 	}
 
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+		this.endTime = startTime.plus(duration);
+	}
+
+	public Duration getDuration() {
+		return duration;
+	}
+
+	public void setStartTime(LocalDateTime startTime) {
+		this.startTime = startTime;
+		this.endTime = startTime.plus(duration);
+	}
+
+	public LocalDateTime getStartTime() {
+		return startTime;
+	}
+
+	public LocalDateTime getEndTime() {
+		return endTime;
+	}
+
+	public void update(Task updated) {
+		this.name = updated.name;
+		this.description = updated.description;
+		this.status = updated.status;
+		this.duration = updated.duration;
+		this.startTime = updated.startTime;
+		this.endTime = updated.endTime;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -66,7 +106,10 @@ public class Task {
 				"id=" + id +
 				", name='" + name + '\'' +
 				", description='" + description + '\'' +
-				", status=" + status +
+				", status=" + status + '\'' +
+				", duration=" + duration + '\'' +
+				", startTime=" + startTime + '\'' +
+				", endTime=" + endTime +
 				'}';
 	}
 }

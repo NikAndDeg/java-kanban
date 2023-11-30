@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 class HistoryManagerTest {
@@ -26,25 +28,25 @@ class HistoryManagerTest {
 
 	@Test
 	public void history_manager_should_save_and_return_task() {
-		historyManager.add(new Task("task 1", "", NEW));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
 		Task taskFromHistory = historyManager.getHistory().get(0);
 
-		Task task = new Task("task 1", "", NEW);
+		Task task = new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now());
 
 		assertEquals(task, taskFromHistory);
 	}
 
 	@Test
 	public void history_manager_should_remove_duplicate_and_save_task_as_last() {
-		historyManager.add(new Task("task 1", "", NEW));
-		historyManager.add(new Task("task 2", "", NEW));
-		historyManager.add(new Task("task 1", "", NEW));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
 		List<Task> tasks = historyManager.getHistory();
 
-		Task firstTask = new Task("task 1", "", NEW);
-		Task secondTask = new Task("task 2", "", NEW);
+		Task firstTask = new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task secondTask = new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now());
 
 		assertEquals(tasks.get(0), secondTask);
 		assertEquals(tasks.get(1), firstTask);
@@ -53,13 +55,13 @@ class HistoryManagerTest {
 
 	@Test
 	public void history_manager_should_delete_first_task() {
-		historyManager.add(new Task("task 1", "", NEW));
-		historyManager.add(new Task("task 2", "", NEW));
-		historyManager.add(new Task("task 3", "", NEW));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		Task firstTask = new Task("task 1", "", NEW);
-		Task secondTask = new Task("task 2", "", NEW);
-		Task thirdTask = new Task("task 3", "", NEW);
+		Task firstTask = new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task secondTask = new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task thirdTask = new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now());
 		Task deletedTask = historyManager.delete(firstTask);
 
 		List<Task> tasks = historyManager.getHistory();
@@ -72,13 +74,13 @@ class HistoryManagerTest {
 
 	@Test
 	public void history_manager_should_delete_middle_task() {
-		historyManager.add(new Task("task 1", "", NEW));
-		historyManager.add(new Task("task 2", "", NEW));
-		historyManager.add(new Task("task 3", "", NEW));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		Task firstTask = new Task("task 1", "", NEW);
-		Task secondTask = new Task("task 2", "", NEW);
-		Task thirdTask = new Task("task 3", "", NEW);
+		Task firstTask = new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task secondTask = new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task thirdTask = new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now());
 		Task deletedTask = historyManager.delete(secondTask);
 
 		List<Task> tasks = historyManager.getHistory();
@@ -91,13 +93,13 @@ class HistoryManagerTest {
 
 	@Test
 	public void history_manager_should_delete_last_task() {
-		historyManager.add(new Task("task 1", "", NEW));
-		historyManager.add(new Task("task 2", "", NEW));
-		historyManager.add(new Task("task 3", "", NEW));
+		historyManager.add(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		historyManager.add(new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		Task firstTask = new Task("task 1", "", NEW);
-		Task secondTask = new Task("task 2", "", NEW);
-		Task thirdTask = new Task("task 3", "", NEW);
+		Task firstTask = new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task secondTask = new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Task thirdTask = new Task("task 3", "", NEW, Duration.ZERO, LocalDateTime.now());
 		Task deletedTask = historyManager.delete(thirdTask);
 
 		List<Task> tasks = historyManager.getHistory();

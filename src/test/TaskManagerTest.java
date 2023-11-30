@@ -9,6 +9,8 @@ import static model.Status.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 abstract class TaskManagerTest <T extends TaskManager> {
@@ -19,23 +21,24 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	 */
 	@Test
 	public void task_manager_should_add_task() {
-		assertEquals(new Task("", "", NEW), manager.addTask(new Task("", "", NEW)));
-		assertEquals(new Task("", "", NEW), manager.getTask(1));
+		assertEquals(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now()),
+				manager.addTask(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now())));
+		assertEquals(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now()), manager.getTask(1));
 	}
 
 	@Test
 	public void task_manager_should_not_add_task_when_adding_already_existing_task() {
-		manager.addTask(new Task("", "", NEW));
+		manager.addTask(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		assertNull(manager.addTask(new Task("", "", NEW)));
+		assertNull(manager.addTask(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now())));
 		assertNull(manager.getTask(2));
 	}
 
 	@Test
 	public void task_manager_should_return_added_task() {
-		manager.addTask(new Task("", "", NEW));
+		manager.addTask(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		assertEquals(new Task("", "", NEW), manager.getTask(1));
+		assertEquals(new Task("", "", NEW, Duration.ZERO, LocalDateTime.now()), manager.getTask(1));
 	}
 
 	@Test
@@ -45,20 +48,20 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
 	@Test
 	public void task_manager_should_return_all_tasks() {
-		manager.addTask(new Task("first task", "", NEW));
-		manager.addTask(new Task("second task", "", DONE));
-		List<Task> tasks = List.of(new Task("first task", "", NEW),
-				new Task("second task", "", DONE));
+		manager.addTask(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
+		List<Task> tasks = List.of(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()),
+				new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertArrayEquals(tasks.toArray(), manager.getTasks().toArray());
 	}
 
 	@Test
 	public void task_manager_should_delete_task() {
-		manager.addTask(new Task("first task", "", NEW));
-		manager.addTask(new Task("second task", "", DONE));
+		manager.addTask(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteTask(1);
-		List<Task> tasks = List.of(new Task("second task", "", DONE));
+		List<Task> tasks = List.of(new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertNull(manager.getTask(1));
 		assertArrayEquals(tasks.toArray(), manager.getTasks().toArray());
@@ -66,10 +69,10 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
 	@Test
 	public void task_manager_should_not_delete_not_existing_task_and_should_return_null() {
-		manager.addTask(new Task("first task", "", NEW));
-		manager.addTask(new Task("second task", "", DONE));
-		List<Task> tasks = List.of(new Task("first task", "", NEW),
-				new Task("second task", "", DONE));
+		manager.addTask(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
+		List<Task> tasks = List.of(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()),
+				new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertNull(manager.deleteTask(555));
 		assertArrayEquals(tasks.toArray(), manager.getTasks().toArray());
@@ -77,8 +80,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
 	@Test
 	public void task_manager_should_delete_all_tasks() {
-		manager.addTask(new Task("first task", "", NEW));
-		manager.addTask(new Task("second task", "", DONE));
+		manager.addTask(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addTask(new Task("second task", "", DONE, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteTasks();
 
 		assertNull(manager.getTask(1));
@@ -88,8 +91,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
 	@Test
 	public void task_manager_should_update_task() {
-		manager.addTask(new Task("first task", "", NEW));
-		Task task = new Task("updated task", "", NEW);
+		manager.addTask(new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		Task task = new Task("updated task", "", NEW, Duration.ZERO, LocalDateTime.now());
 		task.setId(1);
 
 		assertEquals(task, manager.updateTask(task));
@@ -98,7 +101,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 
 	@Test
 	public void task_manager_should_not_update_not_existing_task() {
-		Task task = new Task("first task", "", NEW);
+		Task task = new Task("first task", "", NEW, Duration.ZERO, LocalDateTime.now());
 		task.setId(12);
 
 		assertNull(manager.updateTask(task));
@@ -151,8 +154,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_delete_epic_and_his_subtasks() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "1", "", NEW));
-		manager.addSubtask(new Subtask(1, "2", "", NEW));
+		manager.addSubtask(new Subtask(1, "1", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteEpic(1);
 
 		assertArrayEquals(List.of().toArray(), manager.getEpics().toArray());
@@ -174,8 +177,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	public void task_manager_should_delete_all_epics_and_subtasks() {
 		manager.addEpic(new Epic("1", ""));
 		manager.addEpic(new Epic("2", ""));
-		manager.addSubtask(new Subtask(1, "3", "", NEW));
-		manager.addSubtask(new Subtask(1, "4", "", NEW));
+		manager.addSubtask(new Subtask(1, "3", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "4", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteEpics();
 
 		assertArrayEquals(List.of().toArray(), manager.getEpics().toArray());
@@ -210,8 +213,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_add_subtask() {
 		manager.addEpic(new Epic("", ""));
-		Subtask subtask = new Subtask(1, "", "", NEW);
-		assertEquals(subtask,manager.addSubtask(new Subtask(1, "", "", NEW)));
+		Subtask subtask = new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now());
+		assertEquals(subtask,manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now())));
 		subtask.setId(2);
 
 		assertEquals(subtask, manager.getSubtask(2));
@@ -220,23 +223,23 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_not_add_subtask_when_adding_already_existing_subtask() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "", "", NEW));
+		manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		assertNull(manager.addSubtask(new Subtask(1, "", "", NEW)));
+		assertNull(manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now())));
 		assertNull(manager.getSubtask(3));
 	}
 
 	@Test
 	public void task_manager_should_not_add_subtask_when_epic_is_not_exist() {
-		assertNull(manager.addSubtask(new Subtask(1, "", "", NEW)));
+		assertNull(manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now())));
 		assertNull(manager.getSubtask(1));
 	}
 
 	@Test
 	public void task_manager_should_return_added_subtask() {
 		manager.addEpic(new Epic("", ""));
-		Subtask subtask = new Subtask(1, "", "", NEW);
-		manager.addSubtask(new Subtask(1, "", "", NEW));
+		Subtask subtask = new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now());
+		manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		subtask.setId(2);
 
 		assertEquals(subtask, manager.getSubtask(2));
@@ -250,10 +253,10 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_return_all_epics_subtask() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first", "", NEW));
-		manager.addSubtask(new Subtask(1, "second", "", NEW));
-		Subtask firstSubtask = new Subtask(1, "first", "", NEW);
-		Subtask secondSubtask = new Subtask(1, "second", "", NEW);
+		manager.addSubtask(new Subtask(1, "first", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "second", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		Subtask firstSubtask = new Subtask(1, "first", "", NEW, Duration.ZERO, LocalDateTime.now());
+		Subtask secondSubtask = new Subtask(1, "second", "", NEW, Duration.ZERO, LocalDateTime.now());
 		firstSubtask.setId(2);
 		secondSubtask.setId(3);
 
@@ -263,9 +266,9 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_delete_subtask() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first", "", NEW));
-		manager.addSubtask(new Subtask(1, "second", "", NEW));
-		Subtask subtask = new Subtask(1, "first", "", NEW);
+		manager.addSubtask(new Subtask(1, "first", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "second", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		Subtask subtask = new Subtask(1, "first", "", NEW, Duration.ZERO, LocalDateTime.now());
 		subtask.setId(2);
 
 		assertEquals(subtask, manager.deleteSubtask(2));
@@ -275,7 +278,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_not_delete_not_existing_subtask() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first", "", NEW));
+		manager.addSubtask(new Subtask(1, "first", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
 		assertNull(manager.deleteSubtask(22));
 		assertNull(manager.getSubtask(22));
@@ -284,8 +287,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_update_subtask() {
 		manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "", "", NEW));
-		Subtask subtask = new Subtask(1, "updated name", "", NEW);
+		manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		Subtask subtask = new Subtask(1, "updated name", "", NEW, Duration.ZERO, LocalDateTime.now());
 		subtask.setId(2);
 
 		assertEquals(subtask, manager.updateSubtask(subtask));
@@ -294,7 +297,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void task_manager_should_not_update_not_existing_subtask() {
 		manager.addEpic(new Epic("", ""));
-		Subtask subtask = new Subtask(1, "updated name", "", NEW);
+		Subtask subtask = new Subtask(1, "updated name", "", NEW, Duration.ZERO, LocalDateTime.now());
 		subtask.setId(2);
 
 		assertNull(manager.updateSubtask(subtask));
@@ -313,7 +316,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_NEW_with_NEW_subtask() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "subtask", "", NEW));
+		manager.addSubtask(new Subtask(1, "subtask", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
 		assertEquals(NEW, epic.getStatus());
 	}
@@ -321,7 +324,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_DONE_with_DONE_subtask() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "subtask", "", DONE));
+		manager.addSubtask(new Subtask(1, "subtask", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertEquals(DONE, epic.getStatus());
 	}
@@ -329,7 +332,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_IN_PROGRESS_with_IN_PROGRESS_subtask() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "subtask", "", IN_PROGRESS));
+		manager.addSubtask(new Subtask(1, "subtask", "", IN_PROGRESS, Duration.ZERO, LocalDateTime.now()));
 
 		assertEquals(IN_PROGRESS, epic.getStatus());
 	}
@@ -337,8 +340,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_IN_PROGRESS_with_NEW_and_DONE_subtasks() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first subtask", "", NEW));
-		manager.addSubtask(new Subtask(1, "second subtask", "", DONE));
+		manager.addSubtask(new Subtask(1, "first subtask", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "second subtask", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
 		assertEquals(IN_PROGRESS, epic.getStatus());
 	}
@@ -346,8 +349,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_NEW_when_all_epic_subtasks_is_deleted() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first subtask", "", NEW));
-		manager.addSubtask(new Subtask(1, "second subtask", "", DONE));
+		manager.addSubtask(new Subtask(1, "first subtask", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "second subtask", "", DONE, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteSubtask(2);
 		manager.deleteSubtask(3);
 
@@ -357,8 +360,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_DONE_with_NEW_and_DONE_subtasks_when_NEW_subtask_is_deleted() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first subtask", "", NEW));
-		manager.addSubtask(new Subtask(1, "second subtask", "", DONE));
+		manager.addSubtask(new Subtask(1, "first subtask", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		manager.addSubtask(new Subtask(1, "second subtask", "", DONE, Duration.ZERO, LocalDateTime.now()));
 		manager.deleteSubtask(2);
 
 		assertEquals(DONE, epic.getStatus());
@@ -367,8 +370,8 @@ abstract class TaskManagerTest <T extends TaskManager> {
 	@Test
 	public void epic_status_should_be_IN_PROGRESS_with_NEW_subtask_when_subtask_is_updated_on_IN_PROGRESS() {
 		Epic epic = manager.addEpic(new Epic("", ""));
-		manager.addSubtask(new Subtask(1, "first subtask", "", NEW));
-		Subtask subtask = new Subtask(1, "updated subtask", "", IN_PROGRESS);
+		manager.addSubtask(new Subtask(1, "first subtask", "", NEW, Duration.ZERO, LocalDateTime.now()));
+		Subtask subtask = new Subtask(1, "updated subtask", "", IN_PROGRESS, Duration.ZERO, LocalDateTime.now());
 		subtask.setId(2);
 		manager.updateSubtask(subtask);
 

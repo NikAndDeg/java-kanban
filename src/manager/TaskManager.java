@@ -5,6 +5,7 @@ import model.Subtask;
 import model.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
 
@@ -30,4 +31,6 @@ public interface TaskManager {
 	Subtask deleteSubtask(int id);
 
 	List<Task> getHistory();
+
+	Set<Task> getPrioritizedTasks();
 }
