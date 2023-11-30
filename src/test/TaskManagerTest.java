@@ -6,12 +6,12 @@ import model.Subtask;
 import model.Task;
 import static model.Status.*;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest <T extends TaskManager> {
 	T manager;

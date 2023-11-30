@@ -6,12 +6,12 @@ import model.Epic;
 import static model.Status.*;
 import model.Subtask;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 class EpicTimeTest {
 	TaskManager manager;
