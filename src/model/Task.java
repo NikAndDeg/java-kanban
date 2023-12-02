@@ -13,6 +13,12 @@ public class Task {
 	protected LocalDateTime startTime;
 	protected LocalDateTime endTime;
 
+	public Task(String name, String description, Status status) {
+		this.name = name;
+		this.description = description;
+		this.status = status;
+	}
+
 	public Task(String name, String description, Status status, Duration duration,
 				LocalDateTime startTime) {
 		id = 0;

@@ -97,6 +97,12 @@ class EpicTimeTest {
 	}
 
 	private void assertEpic(Epic expected, Epic actual) {
+		if (expected.getStartTime() == null && expected.getDuration() == null && expected.getEndTime() == null) {
+			assertNull(actual.getStartTime());
+			assertNull(actual.getDuration());
+			assertNull(actual.getEndTime());
+			return;
+		}
 		assertTrue(expected.getStartTime().isEqual(actual.getStartTime()));
 		assertEquals(expected.getDuration(), actual.getDuration());
 		assertTrue(expected.getEndTime().isEqual(actual.getEndTime()));

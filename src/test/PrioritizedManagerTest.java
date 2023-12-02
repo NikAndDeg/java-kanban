@@ -170,6 +170,24 @@ class PrioritizedManagerTest {
 		assertArrayEquals(expected.toArray(), manager.getPrioritizedTasks().toArray());
 	}
 
+	@Test
+	public void prioritized_test_tasks_with_and_without_time() {
+		manager.addTask(createTask("first task", "2020-10-10T10:10:10"));
+		manager.addTask(createTask("second task", "2010-10-10T10:10:10"));
+		manager.addTask(createTask("third task", "1990-10-10T10:10:10"));
+		manager.addTask(createTask("fourth task", "2005-10-10T10:10:10"));
+		manager.addTask(new Task("task without time", "", NEW));
+
+		List<Task> expected = new LinkedList<>();
+		expected.add(createTask("third task", "1990-10-10T10:10:10"));
+		expected.add(createTask("fourth task", "2005-10-10T10:10:10"));
+		expected.add(createTask("second task", "2010-10-10T10:10:10"));
+		expected.add(createTask("first task", "2020-10-10T10:10:10"));
+		expected.add(new Task("task without time", "", NEW));
+
+		assertArrayEquals(expected.toArray(), manager.getPrioritizedTasks().toArray());
+	}
+
 	private Task createTask(String name, String startTime) {
 		return new Task(name,
 				"",

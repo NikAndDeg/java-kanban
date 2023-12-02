@@ -7,11 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Epic extends Task {
-	public static final LocalDateTime DEFAULT_TIME = LocalDateTime.MIN;
 	private final ArrayList<Integer> subtasksId;
 
 	public Epic(String name, String description) {
-		super(name, description, Status.NEW, Duration.ZERO, DEFAULT_TIME);
+		super(name, description, Status.NEW);
 		subtasksId = new ArrayList<>();
 	}
 

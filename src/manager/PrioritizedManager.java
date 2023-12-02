@@ -11,6 +11,13 @@ public class PrioritizedManager {
 
 	public PrioritizedManager() {
 		prioritizedTasks = new TreeSet<>((t1, t2) -> {
+			if(t1.getStartTime() == null && t2.getStartTime() != null)
+				return 1;
+			if(t1.getStartTime() != null && t2.getStartTime() == null)
+				return -1;
+			if(t1.getStartTime() == null && t2.getStartTime() == null)
+				return t1.getId() - t2.getId();
+
 			if (t1.getStartTime().isAfter(t2.getStartTime()))
 				return 1;
 			if (t1.getStartTime().isEqual(t2.getStartTime()))
@@ -28,12 +35,14 @@ public class PrioritizedManager {
 		prioritizedTasks.remove(task);
 	}
 
-	public void update(Task task) {
-		prioritizedTasks.remove(task);
-		prioritizedTasks.add(task);
+	public void update(Task oldTask, Task newTask) {
+		prioritizedTasks.remove(oldTask);
+		prioritizedTasks.add(newTask);
 	}
 
 	public boolean isTimeOverlap(Task task) {
+		if (task.getStartTime() == null)
+			return false;
 		LocalDateTime startTime = task.getStartTime();
 		LocalDateTime endTime = task.getEndTime();
 		return prioritizedTasks.stream()

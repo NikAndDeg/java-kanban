@@ -187,9 +187,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 			Epic epic = new Epic(lineElements[2], lineElements[3]);
 			epic.setStatus(Status.valueOf(lineElements[4]));
 			epic.setId(Integer.parseInt(lineElements[1]));
-			epic.setDuration(Duration.parse(lineElements[5]));
-			epic.setStartTime(LocalDateTime.parse(lineElements[6]));
-			epic.setEndTime(LocalDateTime.parse(lineElements[7]));
+			if (lineElements[5].equals("null"))
+				epic.setDuration(null);
+			else
+				epic.setDuration(Duration.parse(lineElements[5]));
+			if (lineElements[6].equals("null"))
+				epic.setStartTime(null);
+			else
+				epic.setStartTime(LocalDateTime.parse(lineElements[6]));
+			if (lineElements[7].equals("null"))
+				epic.setEndTime(null);
+			else
+				epic.setEndTime(LocalDateTime.parse(lineElements[7]));
 			return epic;
 		}
 		Subtask subtask = new Subtask(Integer.parseInt(lineElements[8]),

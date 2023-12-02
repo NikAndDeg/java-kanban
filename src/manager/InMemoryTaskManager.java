@@ -69,8 +69,8 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		if (prioritizedManager.isTimeOverlap(updatedTask))
 			throw new TimeOverlapException("Time overlap with: " + updatedTask);
+		prioritizedManager.update(task, updatedTask);
 		task.update(updatedTask);
-		prioritizedManager.update(task);
 
 		return task;
 	}
@@ -92,10 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
 
 	@Override
 	public void deleteEpics() {
-		epics.values().forEach(epic -> {
-			historyManager.delete(epic);
-			prioritizedManager.delete(epic);
-		});
+		epics.values().forEach(historyManager::delete);
 		subtasks.values().forEach(subtask -> {
 			historyManager.delete(subtask);
 			prioritizedManager.delete(subtask);
@@ -224,11 +221,11 @@ public class InMemoryTaskManager implements TaskManager {
 			return null;
 		if (prioritizedManager.isTimeOverlap(updatedSubtask))
 			throw new TimeOverlapException("Time overlap with: " + updatedSubtask);
+		prioritizedManager.update(subtask, updatedSubtask);
 		subtask.update(updatedSubtask);
 		Epic epic = epics.get(subtask.getEpicId());
 		updateEpicStatus(epic);
 		updateEpicTime(epic);
-		prioritizedManager.update(subtask);
 
 		return subtask;
 	}
@@ -236,9 +233,9 @@ public class InMemoryTaskManager implements TaskManager {
 	private void updateEpicTime(Epic epic) {
 		List<Subtask> subtasks = getSubtasks(epic.getId());
 		if (subtasks.isEmpty()) {
-			epic.setStartTime(Epic.DEFAULT_TIME);
-			epic.setEndTime(Epic.DEFAULT_TIME);
-			epic.setDuration(Duration.ZERO);
+			epic.setStartTime(null);
+			epic.setEndTime(null);
+			epic.setDuration(null);
 		} else if (subtasks.size() > 1) {
 			subtasks.sort(Comparator.comparing(Task::getStartTime));
 			epic.setStartTime(subtasks.get(0).getStartTime());
