@@ -1,28 +1,42 @@
 package test;
 
-import manager.FileBackedTaskManager;
+import manager.HttpTaskManager;
 import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import static model.Status.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import server.KVServer;
 
-import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static model.Status.DONE;
+import static model.Status.NEW;
 import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
-	private final String defaultSaveDirectory = "resources/saves";
-	private final String defaultSaveFile = "default-save.csv";
-	private final File saveFile = new File(defaultSaveDirectory, defaultSaveFile);
+class HttpTaskManagerTest extends TaskManagerTest<HttpTaskManager> {
+	String url = "http://localhost:8070/";
+	static KVServer server;
+
+	@BeforeAll
+	static void startKVServer() throws IOException {
+		server = new KVServer();
+		server.start();
+	}
+
+	@AfterAll
+	static void stopKVServer() {
+		server.stop();
+	}
 
 	@BeforeEach
-	public void createNewManager() {
-		manager = new FileBackedTaskManager(saveFile);
+	public void createNewManager() throws IOException, InterruptedException {
+		manager = new HttpTaskManager(url);
 	}
 
 	@Test
@@ -30,7 +44,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addTask(new Task("task 2", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	@Test
@@ -40,7 +54,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		manager.addEpic(new Epic("epic 1", ""));
 		manager.addEpic(new Epic("epic 2", ""));
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	@Test
@@ -52,9 +66,10 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
+	//Тот самый тест
 	@Test
 	public void manager_should_be_saved_and_loaded_with_tasks_and_epics_and_subtasks_and_history() {
 		manager.addTask(new Task("task 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
@@ -64,11 +79,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		manager.addSubtask(new Subtask(3, "subtask 1", "", NEW, Duration.ZERO, LocalDateTime.now()));
 		manager.addSubtask(new Subtask(3, "subtask 2", "", DONE, Duration.ZERO, LocalDateTime.now()));
 
-		manager.getTask(1);
-		manager.getSubtask(6);
-		manager.getEpic(3);
-
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	@Test
@@ -86,7 +97,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 		manager.deleteTasks();
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	@Test
@@ -104,7 +115,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
 		manager.deleteEpics();
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	@Test
@@ -123,7 +134,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		manager.deleteTasks();
 		manager.deleteEpics();
 
-		assertTaskManagerEquals(manager, FileBackedTaskManager.loadFromFile(saveFile));
+		assertTaskManagerEquals(manager, HttpTaskManager.load(url, manager.getClientAPIToken()));
 	}
 
 	private void assertTaskManagerEquals(TaskManager firstManager, TaskManager secondManager) {
@@ -131,5 +142,6 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 		assertArrayEquals(firstManager.getEpics().toArray(), secondManager.getEpics().toArray());
 		assertArrayEquals(firstManager.getAllSubtasks().toArray(), secondManager.getAllSubtasks().toArray());
 		assertArrayEquals(firstManager.getHistory().toArray(), secondManager.getHistory().toArray());
+		assertArrayEquals(firstManager.getPrioritizedTasks().toArray(), secondManager.getPrioritizedTasks().toArray());
 	}
 }

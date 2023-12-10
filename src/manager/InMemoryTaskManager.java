@@ -1,5 +1,6 @@
 package manager;
 
+import exception.SubtaskAlreadyExistException;
 import exception.TimeOverlapException;
 import model.Epic;
 import model.Status;
@@ -11,11 +12,11 @@ import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 	protected int idCounter;
-	protected final HashMap<Integer, Task> tasks;
-	protected final HashMap<Integer, Epic> epics;
-	protected final HashMap<Integer, Subtask> subtasks;
-	protected final HistoryManager historyManager;
-	protected final PrioritizedManager prioritizedManager;
+	protected HashMap<Integer, Task> tasks;
+	protected HashMap<Integer, Epic> epics;
+	protected HashMap<Integer, Subtask> subtasks;
+	protected HistoryManager historyManager;
+	protected PrioritizedManager prioritizedManager;
 
 	public InMemoryTaskManager() {
 		idCounter = 0;
@@ -155,7 +156,7 @@ public class InMemoryTaskManager implements TaskManager {
 		Epic epic = epics.get(epicId);
 		List<Subtask> epicSubtasks = new ArrayList<>();
 		if (epic == null)
-			return epicSubtasks;
+			return null;
 		epic.getSubtasksId().forEach(id -> epicSubtasks.add(subtasks.get(id)));
 
 		return epicSubtasks;
@@ -176,9 +177,10 @@ public class InMemoryTaskManager implements TaskManager {
 	}
 
 	@Override
-	public Subtask addSubtask(Subtask subtask) {
-		if (subtasks.containsValue(subtask))
-			return null;
+	public Subtask addSubtask(Subtask subtask) throws SubtaskAlreadyExistException {
+		if (subtasks.containsValue(subtask)) {
+			throw new SubtaskAlreadyExistException("Subtask " + subtask + " already exist.");
+		}
 		Epic epic = epics.get(subtask.getEpicId());
 		if (epic == null)
 			return null;

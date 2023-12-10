@@ -226,7 +226,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 		}
 	}
 
-	private void save() {
+	protected void save() {
 		Path path = createSaveFile(Paths.get(saveFile.getPath()));
 		try (Writer writer = new FileWriter(path.toFile())) {
 			writer.write(FIRST_LINE);

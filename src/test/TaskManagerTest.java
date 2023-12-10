@@ -1,5 +1,6 @@
 package test;
 
+import exception.SubtaskAlreadyExistException;
 import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
@@ -159,7 +160,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 		manager.deleteEpic(1);
 
 		assertArrayEquals(List.of().toArray(), manager.getEpics().toArray());
-		assertArrayEquals(List.of().toArray(), manager.getSubtasks(1).toArray());
+		assertNull(manager.getSubtasks(1));
 	}
 
 	@Test
@@ -182,7 +183,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
 		manager.deleteEpics();
 
 		assertArrayEquals(List.of().toArray(), manager.getEpics().toArray());
-		assertArrayEquals(List.of().toArray(), manager.getSubtasks(1).toArray());
+		assertNull(manager.getSubtasks(1));
 	}
 
 	@Test
@@ -225,8 +226,10 @@ abstract class TaskManagerTest <T extends TaskManager> {
 		manager.addEpic(new Epic("", ""));
 		manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now()));
 
-		assertNull(manager.addSubtask(new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now())));
-		assertNull(manager.getSubtask(3));
+		Exception exception = assertThrows(SubtaskAlreadyExistException.class,
+				() -> manager.addSubtask(
+						new Subtask(1, "", "", NEW, Duration.ZERO, LocalDateTime.now())
+				));
 	}
 
 	@Test
