@@ -3,7 +3,6 @@ package server;
 import static server.Endpoint.*;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -11,30 +10,23 @@ import com.sun.net.httpserver.HttpServer;
 
 import exception.SubtaskAlreadyExistException;
 import exception.TimeOverlapException;
+import manager.Managers;
 import manager.TaskManager;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import server.adapter.DurationAdapter;
-import server.adapter.LocalDateTimeAdapter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
 public class HttpTaskServer {
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-	private static final Gson gson = new GsonBuilder()
-			.setPrettyPrinting()
-			.registerTypeAdapter(Duration.class, new DurationAdapter())
-			.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-			.create();
+	private static final Gson gson = Managers.getGson();
 
 	private final TaskManager manager;
 	private final HttpServer server;
@@ -56,49 +48,51 @@ public class HttpTaskServer {
 
 	class TasksHandler implements HttpHandler {
 		@Override
-		public void handle(HttpExchange exchange) throws IOException {
-			Endpoint endpoint = getEndpoint(exchange);
-			if (isTaskEndpoint(endpoint))
-				handleTaskEndpoint(exchange, endpoint);
-			if (isEpicEndpoint(endpoint))
-				handleEpicEndpoint(exchange, endpoint);
-			if (isSubtaskEndpoint(endpoint))
-				handleSubtaskEndpoint(exchange, endpoint);
-			if (endpoint.equals(GET_HISTORY))
-				handleHistoryEndpoint(exchange);
-			if (endpoint.equals(GET_PRIORITIZED_TASKS))
-				handlePrioritizedTasksEndpoint(exchange);
-			if (endpoint.equals(UNSUPPORTED))
-				handleUnsupportedEndpoint(exchange);
+		public void handle(HttpExchange exchange) {
+			try {
+				Endpoint endpoint = getEndpoint(exchange);
+				if (isTaskEndpoint(endpoint))
+					handleTaskEndpoints(exchange, endpoint);
+				if (isEpicEndpoint(endpoint))
+					handleEpicEndpoints(exchange, endpoint);
+				if (isSubtaskEndpoint(endpoint))
+					handleSubtaskEndpoints(exchange, endpoint);
+				if (endpoint.equals(GET_HISTORY))
+					handleHistoryEndpoints(exchange);
+				if (endpoint.equals(GET_PRIORITIZED_TASKS))
+					handlePrioritizedTasksEndpoint(exchange);
+				if (endpoint.equals(UNSUPPORTED))
+					handleUnsupportedEndpoint(exchange);
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			} finally {
+				exchange.close();
+			}
 		}
 
 		private void handleUnsupportedEndpoint(HttpExchange exchange) throws IOException {
-			String response = "Not Allowed.";
-			int responseCode = 405;
-			writeResponse(exchange, response, responseCode);
+			writeResponse(exchange, "Not Allowed.", 405);
 		}
 
 		private void handlePrioritizedTasksEndpoint(HttpExchange exchange) throws IOException {
 			Set<Task> prioritizedTasks = manager.getPrioritizedTasks();
 			String response = gson.toJson(prioritizedTasks);
-			int responseCode = 200;
-			writeResponse(exchange, response, responseCode);
+			writeResponse(exchange, response, 200);
 		}
 
-		private void handleHistoryEndpoint(HttpExchange exchange) throws IOException {
+		private void handleHistoryEndpoints(HttpExchange exchange) throws IOException {
 			List<Task> history = manager.getHistory();
 			String response = gson.toJson(history);
-			int responseCode = 200;
-			writeResponse(exchange, response, responseCode);
+			writeResponse(exchange, response, 200);
 		}
 
-		private void handleSubtaskEndpoint(HttpExchange exchange, Endpoint endpoint) throws IOException {
+		private void handleSubtaskEndpoints(HttpExchange exchange, Endpoint endpoint) throws IOException {
 			String response = "Something went wrong.";
 			int responseCode = 500;
 			switch (endpoint) {
 				case GET_SUBTASKS_BY_EPIC_ID:
 					try {
-						int epicId = Integer.parseInt(getPathParam(exchange)[1]);
+						int epicId = getIDFromPathParam(exchange);
 						List<Subtask> subtasks = manager.getSubtasks(epicId);
 						if (subtasks == null) {
 							response = "Epic not found.";
@@ -119,7 +113,7 @@ public class HttpTaskServer {
 					break;
 				case GET_SUBTASK_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Subtask subtask = manager.getSubtask(id);
 						if (subtask == null) {
 							response = "Subtask not found";
@@ -176,7 +170,7 @@ public class HttpTaskServer {
 					break;
 				case DELETE_SUBTASK_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Subtask subtask = manager.deleteSubtask(id);
 						if (subtask == null) {
 							response = "Subtask nou found.";
@@ -194,7 +188,7 @@ public class HttpTaskServer {
 			writeResponse(exchange, response, responseCode);
 		}
 
-		private void handleEpicEndpoint(HttpExchange exchange, Endpoint endpoint) throws IOException {
+		private void handleEpicEndpoints(HttpExchange exchange, Endpoint endpoint) throws IOException {
 			String response = "Something went wrong.";
 			int responseCode = 500;
 			switch (endpoint) {
@@ -210,7 +204,7 @@ public class HttpTaskServer {
 					break;
 				case GET_EPIC_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Epic epic = manager.getEpic(id);
 						if (epic == null) {
 							response = "Epic not found.";
@@ -258,7 +252,7 @@ public class HttpTaskServer {
 					break;
 				case DELETE_EPIC_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Epic epic = manager.deleteEpic(id);
 						if (epic == null) {
 							response = "Epic not found.";
@@ -276,7 +270,7 @@ public class HttpTaskServer {
 			writeResponse(exchange, response, responseCode);
 		}
 
-		private void handleTaskEndpoint(HttpExchange exchange, Endpoint endpoint) throws IOException {
+		private void handleTaskEndpoints(HttpExchange exchange, Endpoint endpoint) throws IOException {
 			String response = "Something went wrong.";
 			int responseCode = 500;
 			switch (endpoint) {
@@ -292,7 +286,7 @@ public class HttpTaskServer {
 					break;
 				case GET_TASK_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Task task = manager.getTask(id);
 						if (task == null) {
 							response = "Task not found.";
@@ -347,7 +341,7 @@ public class HttpTaskServer {
 					break;
 				case DELETE_TASK_BY_ID:
 					try {
-						int id = Integer.parseInt(getPathParam(exchange)[1]);
+						int id = getIDFromPathParam(exchange);
 						Task task = manager.deleteTask(id);
 						if (task == null) {
 							response = "Task not found.";
@@ -449,8 +443,8 @@ public class HttpTaskServer {
 					endpoint.equals(DELETE_SUBTASK_BY_ID);
 		}
 
-		private String[] getPathParam(HttpExchange exchange) {
-			return exchange.getRequestURI().getQuery().split("=");
+		private int getIDFromPathParam(HttpExchange exchange) {
+			return Integer.parseInt(exchange.getRequestURI().getQuery().split("=")[1]);
 		}
 
 		private Task getTaskFromBody(HttpExchange exchange) throws IOException, JsonSyntaxException {

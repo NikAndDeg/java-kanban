@@ -15,13 +15,14 @@ public class KVTaskClient {
 
 	public KVTaskClient(String URL) throws IOException, InterruptedException {
 		this.URL = URL;
-		client = HttpClient.newHttpClient();
-		request = HttpRequest.newBuilder()
-				.GET()
-				.uri(URI.create(URL + "register"))
-				.build();
-		response = client.send(request, HttpResponse.BodyHandlers.ofString());
-		this.apiToken = response.body();
+		this.client = HttpClient.newHttpClient();
+		this.apiToken = register();
+	}
+
+	public KVTaskClient(String URL, String apiToken) {
+		this.URL = URL;
+		this.client = HttpClient.newHttpClient();
+		this.apiToken = apiToken;
 	}
 
 	public void put(String key, String data) throws IOException, InterruptedException {
@@ -30,7 +31,12 @@ public class KVTaskClient {
 				.POST(HttpRequest.BodyPublishers.ofString(data))
 				.uri(URI.create(URL + "save/" + key + "?API_TOKEN=" + apiToken))
 				.build();
-		client.send(request, HttpResponse.BodyHandlers.ofString());
+		response = client.send(request, HttpResponse.BodyHandlers.ofString());
+		int statusCode = response.statusCode();
+		if (statusCode != 200) {
+			throw new KVTaskClientSaveException("Save data error." +
+					" Response code from server " + statusCode);
+		}
 	}
 
 	public String load(String key) throws  IOException, InterruptedException {
@@ -40,10 +46,47 @@ public class KVTaskClient {
 				.uri(URI.create(URL + "load/" + key + "?API_TOKEN=" + apiToken))
 				.build();
 		response = client.send(request, HttpResponse.BodyHandlers.ofString());
+		int statusCode = response.statusCode();
+		if (statusCode != 200) {
+			throw new KVTaskClientLoadException("Load data error." +
+					" Response code from server " + statusCode);
+		}
 		return response.body();
 	}
 
 	public String getApiToken() {
 		return apiToken;
+	}
+
+	private String register() throws IOException, InterruptedException {
+		request = HttpRequest.newBuilder()
+				.GET()
+				.uri(URI.create(URL + "register"))
+				.build();
+		response = client.send(request, HttpResponse.BodyHandlers.ofString());
+		int statusCode = response.statusCode();
+		if (statusCode != 200) {
+			throw new KVTaskClientRegistrationException("Client registration error." +
+					" Response code from server " + statusCode);
+		}
+		return response.body();
+	}
+
+	static class KVTaskClientSaveException extends IOException {
+		public KVTaskClientSaveException(String message) {
+			super(message);
+		}
+	}
+
+	static class KVTaskClientLoadException extends IOException {
+		public KVTaskClientLoadException(String message) {
+			super(message);
+		}
+	}
+
+	static class KVTaskClientRegistrationException extends IOException {
+		public KVTaskClientRegistrationException(String message) {
+			super(message);
+		}
 	}
 }

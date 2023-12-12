@@ -6,23 +6,13 @@ import com.google.gson.reflect.TypeToken;
 import model.Epic;
 import model.Subtask;
 import model.Task;
-import server.adapter.DurationAdapter;
-import server.adapter.LocalDateTimeAdapter;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class HttpTaskManager extends FileBackedTaskManager{
-	private static final Gson gson = new GsonBuilder()
-			.registerTypeAdapter(Duration.class, new DurationAdapter())
-			.registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-			.create();
+	private static final Gson gson = Managers.getGson();
 	private static final String TASK_KEY = "task";
 	private static final String EPIC_KEY = "epic";
 	private static final String SUBTASK_KEY = "subtask";
@@ -58,7 +48,7 @@ public class HttpTaskManager extends FileBackedTaskManager{
 
 	public static HttpTaskManager load(String URL, String apiToken) {
 		try {
-			HttpTaskManager manager = new HttpTaskManager(URL);
+			HttpTaskManager manager = new HttpTaskManager(URL, apiToken);
 			manager.idCounter = gson.fromJson(manager.client.load(COUNTER_KEY), Integer.class);
 			manager.tasks = gson.fromJson(manager.client.load(TASK_KEY), TYPE_HASH_MAP_INTEGER_TASK);
 			manager.epics = gson.fromJson(manager.client.load(EPIC_KEY), TYPE_HASH_MAP_INTEGER_EPIC);
@@ -75,6 +65,11 @@ public class HttpTaskManager extends FileBackedTaskManager{
 
 	public String getClientAPIToken() {
 		return client.getApiToken();
+	}
+
+	private HttpTaskManager(String URL, String apiToken) {
+		super(null);
+		this.client = new KVTaskClient(URL, apiToken);
 	}
 
 	private static void loadHistory(HttpTaskManager manager) throws IOException, InterruptedException {
@@ -101,10 +96,5 @@ public class HttpTaskManager extends FileBackedTaskManager{
 			else
 				manager.prioritizedManager.add(gson.fromJson(jsonObject, Task.class));
 		});
-	}
-
-	public static FileBackedTaskManager loadFromFile(File saveFile) {
-		System.out.println("Method not supported.");
-		return null;
 	}
 }
