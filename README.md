@@ -1,5 +1,5 @@
 # java-kanban
-RESTful трекер задач
+RESTful трекер задач.
 Технологии: Java Core, JUnit
 
 Описание: Проект, направленный на ознакомление с технологиями Java Core, JUnit, GSON, и RESTful API.
